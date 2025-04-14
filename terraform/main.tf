@@ -3,10 +3,10 @@ provider "aws" {
 }
 
 resource "aws_security_group" "web_sg" {
-  name        = "web_seg_fastapi"
+  name        = "web_seg_oficinamec"
   description = "Permite acesso HTTP e SSH."
   vpc_id      = "vpc-036ff1a269a819515"
-
+   
   ingress {
     from_port   = 80
     to_port     = 80
@@ -45,6 +45,6 @@ resource "aws_instance" "app_server" {
               EOF
 
   tags = {
-    Name = "fastapi-login-app"
+    Name = "oficinamec-app"
   }
 }
