@@ -7,8 +7,7 @@ variable "instance_type" {
 }
 
 variable "ami" {
-  default = "ami-0d866da98d63e2b42
-"
+  default = "ami-0d866da98d63e2b42"
 }
 
 variable "key_name" {
