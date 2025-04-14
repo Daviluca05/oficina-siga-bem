@@ -60,4 +60,4 @@ jobs:
           script: |
             cd /home/ubuntu/app
             sudo docker build -t login-app .
-            sudo docker run -d -p 80:80 --restart always --name login-container login-app
+            sudo docker run -d -p 8080:80 --restart always --name login-container login-app
