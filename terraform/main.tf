@@ -30,6 +30,6 @@ resource "aws_instance" "app_server" {
               EOF
 
   tags = {
-    Name = "templeteoficina"
+    Name = "Oficina-app"
   }
 }
