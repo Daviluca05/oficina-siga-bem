@@ -5,6 +5,7 @@ provider "aws" {
 resource "aws_security_group" "web_sg" {
   name        = "web_seg_fastapi"
   description = "Permite acesso HTTP e SSH."
+  vpc_id      = "vpc-036ff1a269a819515"
 
   ingress {
     from_port   = 80
