@@ -1,40 +1,51 @@
-from fastapi import FastAPI, Form
+from fastapi import FastAPI, Form, Request
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel
+from typing import List
+import sqlite3
 
 app = FastAPI()
 
+# Banco de dados local
+def init_db():
+    conn = sqlite3.connect("siga_bem.db")
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS dados (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nome TEXT NOT NULL,
+            descricao TEXT NOT NULL
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+init_db()
+
+# Páginas HTML
+templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 @app.get("/", response_class=HTMLResponse)
-async def dados_form():
-    return """
-    <html>
-        <head>
-            <title>Dados - Oficina</title>
-        </head>
-        <body style="font-family: Arial; margin: 40px;">
-            <h1 style="color: blue;">📋 Dados da Oficina</h1>
-            <form action="/enviar" method="post">
-                <label for="titulo">Título:</label><br>
-                <input type="text" id="titulo" name="titulo" required style="width: 300px;"><br><br>
+def formulario(request: Request):
+    return templates.TemplateResponse("formulario.html", {"request": request})
 
-                <label for="descricao">Descrição:</label><br>
-                <textarea id="descricao" name="descricao" rows="4" cols="50" required></textarea><br><br>
+@app.post("/dados", response_class=HTMLResponse)
+def salvar_dado(request: Request, nome: str = Form(...), descricao: str = Form(...)):
+    conn = sqlite3.connect("siga_bem.db")
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO dados (nome, descricao) VALUES (?, ?)", (nome, descricao))
+    conn.commit()
+    conn.close()
+    return templates.TemplateResponse("sucesso.html", {"request": request, "nome": nome})
 
-                <input type="submit" value="Enviar">
-            </form>
-        </body>
-    </html>
-    """
-
-@app.post("/enviar", response_class=HTMLResponse)
-async def enviar_dados(titulo: str = Form(...), descricao: str = Form(...)):
-    return f"""
-    <html>
-        <head><title>Enviado</title></head>
-        <body style="font-family: Arial; margin: 40px;">
-            <h1 style="color: green;">✅ Enviado com sucesso!</h1>
-            <p><strong>Título:</strong> {titulo}</p>
-            <p><strong>Descrição:</strong> {descricao}</p>
-            <a href="/">🔙 Voltar</a>
-        </body>
-    </html>
-    """
+@app.get("/dados", response_model=List[dict])
+def listar_dados():
+    conn = sqlite3.connect("siga_bem.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, nome, descricao FROM dados")
+    rows = cursor.fetchall()
+    conn.close()
+    return [{"id": r[0], "nome": r[1], "descricao": r[2]} for r in rows]
