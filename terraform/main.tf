@@ -2,30 +2,15 @@ provider "aws" {
   region = var.region
 }
 
-resource "aws_security_group" "web_sg" {
-  name        = "web_seg_oficinamec"
-  description = "Permite acesso HTTP e SSH."
-  vpc_id      = "vpc-036ff1a269a819515"
-   
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+data "aws_security_group" "web_sg" {
+  filter {
+    name   = "group-name"
+    values = ["web_seg_oficinamec"]
   }
 
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+  filter {
+    name   = "vpc-id"
+    values = ["vpc-036ff1a269a819515"]
   }
 }
 
@@ -33,7 +18,7 @@ resource "aws_instance" "app_server" {
   ami                    = var.ami
   instance_type          = var.instance_type
   key_name               = var.key_name
-  vpc_security_group_ids = [aws_security_group.web_sg.id]
+  vpc_security_group_ids = [data.aws_security_group.web_sg.id]
 
   user_data = <<-EOF
               #!/bin/bash
@@ -45,6 +30,6 @@ resource "aws_instance" "app_server" {
               EOF
 
   tags = {
-    Name = "oficinamec-app"
+    Name = "fastapi-login-app"
   }
 }
