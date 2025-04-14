@@ -11,9 +11,9 @@ variable "ami" {
 }
 
 variable "key_name" {
-  default = "fastapi_key"
+  default = "oficinamecaws"
 }
 
 variable "docker_image" {
-  default = "ronierisonmaciel/login-app:latest"
+  default = "daviluca05/oficinamec-app:latest"
 }
